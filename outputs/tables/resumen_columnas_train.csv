@@ -1,0 +1,4 @@
+columna,tipo,no_nulos,nulos,n_unicos
+user_id,int64,260864,0,212062
+merchant_id,int64,260864,0,1993
+label,int64,260864,0,2

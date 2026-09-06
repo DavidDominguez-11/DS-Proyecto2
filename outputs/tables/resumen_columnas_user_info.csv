@@ -1,0 +1,4 @@
+columna,tipo,no_nulos,nulos,n_unicos
+user_id,int64,424170,0,424170
+age_range,float64,421953,2217,9
+gender,float64,417734,6436,3

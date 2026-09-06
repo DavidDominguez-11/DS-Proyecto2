@@ -1,0 +1,12 @@
+columna,tipo,no_nulos,nulos,n_unicos
+user_id,int32,14058666,0,424170
+merchant_id,int32,14058666,0,4995
+clicks,int32,14058666,0,955
+cart,int32,14058666,0,19
+purchase,int32,14058666,0,59
+favorite,int32,14058666,0,140
+total_actions,int64,14058666,0,985
+n_items,int64,14058666,0,420
+n_cats,int64,14058666,0,49
+n_brands,int64,14058666,0,35
+n_days,int64,14058666,0,101

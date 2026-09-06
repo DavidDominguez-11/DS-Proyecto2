@@ -1,0 +1,4 @@
+columna,tipo,no_nulos,nulos,n_unicos
+user_id,int64,261477,0,212108
+merchant_id,int64,261477,0,1993
+prob,float64,0,261477,0
