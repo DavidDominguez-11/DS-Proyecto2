@@ -1,0 +1,14 @@
+,pearson,spearman
+n_items,0.099,0.088
+n_cats,0.103,0.085
+purchase,0.084,0.082
+total_actions,0.081,0.072
+clicks,0.077,0.064
+n_days,0.078,0.058
+click_rate,0.023,0.037
+favorite,0.052,0.032
+favorite_rate,0.016,0.026
+n_brands,0.015,0.008
+cart,-0.003,-0.006
+cart_rate,-0.006,-0.006
+purchase_rate,-0.028,-0.045
