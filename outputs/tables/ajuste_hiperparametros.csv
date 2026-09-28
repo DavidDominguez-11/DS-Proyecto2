@@ -1,0 +1,4 @@
+modelo,auc_cv_defecto,auc_cv_ajustado,mejora,auc_cv_std_ajustado,auc_train_defecto,auc_train_ajustado,configuraciones_probadas,tiempo_busqueda_min,mejores_hiperparametros
+Regresión Logística,0.6911,0.6915,0.0004,0.0027,0.7239,0.7238,12,1.9711,"{""C"": 0.00127}"
+Random Forest,0.6496,0.6903,0.0407,0.0022,1.0,0.7798,12,16.1315,"{""max_depth"": null, ""max_features"": 0.2, ""max_samples"": 0.661, ""min_samples_leaf"": 167, ""n_estimators"": 493}"
+LightGBM,0.6863,0.6931,0.0068,0.0012,0.7908,0.7767,30,14.1871,"{""colsample_bytree"": 0.40304, ""learning_rate"": 0.00781, ""min_child_samples"": 387, ""n_estimators"": 1021, ""num_leaves"": 42, ""reg_alpha"": 3.25981, ""reg_lambda"": 2.24269, ""scale_pos_weight"": 1.0, ""subsample"": 0.60723}"
