@@ -13,7 +13,7 @@ Este documento describe las revisiones de calidad de datos, las decisiones de li
 | `train_format1.csv` | 260,864 | 0 | Ninguno | Datos limpios. |
 | `test_format1.csv` | 261,477 | 0 | `prob`: 261,477 (por diseño) | Columna `prob` vacía es esperada. |
 | `user_info_format1.csv` | 424,170 | 0 | `age_range`: 2,217; `gender`: 6,436 | Valores NaN reales + códigos de "desconocido". |
-| `user_log_format1.csv` | 54,925,330 | No verificado exhaustivamente | `brand_id`: 91,015 | Archivo demasiado grande para verificación completa de duplicados. |
+| `user_log_format1.csv` | 54,925,330 | 13,750,198 filas idénticas (25.03 %) | `brand_id`: 91,015 | Duplicados conservados: el log no registra la hora, por lo que representan interacciones repetidas el mismo día. |
 
 ---
 
@@ -24,7 +24,7 @@ Este documento describe las revisiones de calidad de datos, las decisiones de li
 - **train_format1.csv**: No se encontraron filas duplicadas. Cada par (user_id, merchant_id) es único.
 - **test_format1.csv**: No se encontraron filas duplicadas.
 - **user_info_format1.csv**: No se encontraron user_id duplicados.
-- **user_log_format1.csv**: No se realizó una verificación exhaustiva de duplicados debido al tamaño del archivo (55 millones de filas). Es posible que existan registros con el mismo (user_id, item_id, seller_id, time_stamp, action_type), ya que un usuario podría hacer clic en el mismo producto múltiples veces en el mismo día. Estos registros se conservan porque representan interacciones repetidas legítimas.
+- **user_log_format1.csv**: Se verificó de forma exacta. Como el particionado por *hash* coloca todas las filas de un par (usuario, vendedor) en la misma partición, las filas idénticas siempre quedan juntas y se pueden contar partición por partición. Resultado: **13,750,198 filas (25.03 %)** repiten exactamente usuario, producto, categoría, vendedor, marca, día y tipo de acción. **Decisión**: se conservan, porque `time_stamp` solo tiene granularidad diaria y un usuario puede hacer clic varias veces en el mismo producto el mismo día; eliminarlas subestimaría la intensidad de interacción.
 
 ### 2.2 Valores Faltantes
 
@@ -43,30 +43,31 @@ Este documento describe las revisiones de calidad de datos, las decisiones de li
 
 Además de los valores NaN, los datos contienen categorías explícitas que requieren tratamiento especial:
 
-| Variable | Código | Significado | Cantidad (aprox.) |
+| Variable | Código | Significado | Usuarios (de 424,170) |
 |----------|--------|-------------|-------------------|
-| `age_range` | 0 | Desconocido | Variable (ver notebook) |
-| `age_range` | 8 | 50 años o más | Variable (ver notebook) |
-| `gender` | 2 | Desconocido | Variable (ver notebook) |
+| `age_range` | 0 | Desconocido | 92,914 |
+| `age_range` | 7 | 50 años o más | 6,992 |
+| `age_range` | 8 | 50 años o más | 1,266 |
+| `gender` | 2 | Desconocido | 10,426 |
 
 **Decisión**: `age_range = 0` y el `NaN` original se consideran desconocidos; `age_range = 7` y `age_range = 8` se consolidan en la categoría analítica `50+`; `gender = 2` y el `NaN` original se consideran desconocidos. Estas categorías se reportan por separado en los gráficos y tablas de frecuencia para que el lector pueda evaluar su impacto. No se eliminan ni se imputan valores para estas categorías, ya que la imputación introduciría supuestos no justificados.
 
 ### 2.4 Validación de Llaves
 
-- **user_id en train → user_info**: Se verificó cuántos usuarios del conjunto de entrenamiento tienen perfil demográfico disponible en user_info. No todos los usuarios de train necesariamente existen en user_info. Los pares sin información demográfica reciben valores de "desconocido" en el merge.
-- **merchant_id en train → seller_id en user_log**: Se verificó la correspondencia entre `merchant_id` del entrenamiento y `seller_id` del log de actividad. Algunos pares (user_id, merchant_id) del entrenamiento podrían no tener actividad registrada en user_log; estos se conservan con métricas de actividad en cero o NaN, documentando la ausencia.
+- **merchant_id en train → seller_id en user_log**: Se verificó la correspondencia entre `merchant_id` del entrenamiento y `seller_id` del log de actividad. **El 100 % de los pares (user_id, merchant_id) del entrenamiento (260,864) tiene actividad registrada en user_log**, por lo que ningún par queda sin métricas de comportamiento.
+- **user_id en train → user_info**: El 100 % de los 212,062 usuarios únicos del entrenamiento tiene perfil en user_info.
 - **Consistencia train ↔ test**: Se verificó que los conjuntos de entrenamiento y prueba no comparten los mismos pares (user_id, merchant_id), confirmando la separación adecuada.
 
 ### 2.5 Validación de Valores Esperados
 
 - **`label`**: Se verificó que solo contiene valores 0 y 1, sin valores inesperados.
-- **`action_type`**: Se verificó que solo contiene valores 0, 1, 2 y 3, consistente con la documentación.
-- **`time_stamp`**: Rango observado de 511 a 1112 (formato MMDD). Se verificó que los valores sean plausibles como fechas (mayo a noviembre).
+- **`action_type`**: Se verificó sobre las 54.9 millones de filas (conteo durante la lectura por fragmentos, con aserción en el notebook) que solo contiene valores 0, 1, 2 y 3. Composición: clics 88.39 %, compras 5.99 %, favoritos 5.47 % y carrito 0.14 %.
+- **`time_stamp`**: Rango observado de 511 a 1112 (formato MMDD, 186 días distintos). Se verificó con una aserción que todos los valores corresponden a meses entre 5 y 11 y días entre 1 y 31.
 
 ### 2.6 Marca Temporal (time_stamp)
 
 - **Formato**: Entero en formato MMDD (ejemplo: 511 = 11 de mayo, 1111 = 11 de noviembre, 1112 = 12 de noviembre).
-- **Tratamiento**: Se utiliza como identificador de fecha para contar días activos por par usuario-vendedor. No se convierte a formato datetime estándar ya que el entero MMDD es suficiente para las métricas de conteo y no se dispone del año para una conversión completa.
+- **Tratamiento**: Se utiliza como identificador de fecha para contar días activos por par usuario-vendedor. No se convierte a formato datetime estándar ya que el entero MMDD es suficiente para las métricas de conteo y no se dispone del año para una conversión completa. Solo para graficar la actividad diaria se convierte a fecha con un año de referencia no bisiesto.
 - **Observación**: El rango cubre aproximadamente 6 meses (mayo a noviembre), incluyendo el periodo del festival Double 11.
 
 ### 2.7 Tipos de Datos
@@ -126,7 +127,7 @@ La tabla analítica final se construyó mediante los siguientes pasos:
 1. **Base**: Conjunto de entrenamiento `train_clean` (260,864 filas, unidad: par user_id-merchant_id).
 2. **Merge con user_info_clean**: Left join por `user_id`, agregando `age_range` y `gender`.
 3. **Merge con métricas de actividad**: Left join por (`user_id`, `merchant_id` = `seller_id`), agregando todas las variables derivadas.
-4. **Tratamiento de pares sin actividad**: Los pares usuario-vendedor sin registros en user_log reciben 0 en conteos y NaN en tasas (que se reemplazan por 0).
+4. **Tratamiento de pares sin actividad**: Se previó rellenar con 0 los conteos y tasas de pares sin registros en user_log, pero la validación mostró que no existe ningún par de entrenamiento sin actividad, por lo que este relleno no afectó a ninguna fila.
 5. **Resultado**: Una tabla con 260,864 filas y columnas que incluyen la etiqueta, datos demográficos y métricas de actividad.
 
 ---
@@ -138,4 +139,5 @@ La tabla analítica final se construyó mediante los siguientes pasos:
 3. **Marca temporal imprecisa**: El formato MMDD no incluye año ni hora, limitando el análisis temporal a la granularidad de días.
 4. **Sesgo de muestreo posible**: Los datos provienen de una plataforma específica (Tmall) durante un periodo específico, por lo que los patrones encontrados podrían no generalizarse a otros contextos.
 5. **brand_id faltantes**: 91,015 registros sin marca podrían subestimar la diversidad de marcas en las métricas derivadas.
-6. **Pares sin actividad**: Algunos pares del entrenamiento podrían no tener actividad registrada en user_log, lo que limita el análisis de comportamiento para esos casos.
+6. **Distribuciones sesgadas**: Las métricas de actividad tienen colas largas y numerosos outliers; se conservan porque representan comportamiento real, pero los modelos lineales requerirán transformaciones (por ejemplo, `log1p`).
+7. **Filas repetidas en user_log**: El 25.03 % de las filas son idénticas a otra; sin la hora no es posible distinguir una acción repetida el mismo día de un registro duplicado por error. Las métricas de conteo de acciones las incluyen; las de valores distintos (`n_items`, `n_cats`, `n_days`) no se ven afectadas.

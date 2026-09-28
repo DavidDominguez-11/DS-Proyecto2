@@ -17,14 +17,14 @@ Este documento resume los principales hallazgos del análisis exploratorio de da
 
 ### 1.2 Perfil Demográfico y Recompra
 
-- **Edad**: Los rangos de edad con mayor proporción de compradores recurrentes tienden a concentrarse entre 25 y 49 años, con `50+` consolidado como una sola categoría analítica. La proporción de usuarios con edad desconocida sigue siendo relevante (código 0 o NaN), por lo que la fortaleza de esta conclusión sigue siendo moderada.
-- **Género**: Se observan diferencias modestas en la tasa de recompra entre géneros, aunque la proporción de género desconocido es considerable y diluye las diferencias observadas.
+- **Edad**: La tasa de recompra aumenta con la edad hasta el grupo 35–39 (7.00 %) y desciende ligeramente después (40–49: 6.83 %; `50+`: 6.18 %). El grupo 18–24 tiene la tasa más baja (4.93 %) y 25–29 (5.88 %) queda por debajo del promedio general (6.12 %). La edad es desconocida en el 21.9 % de los pares, por lo que la fortaleza de esta conclusión es moderada.
+- **Género**: La tasa de recompra femenina (6.45 %) supera a la masculina (5.38 %). El género desconocido representa solo el 4.1 % de los pares, por lo que afecta poco a esta comparación.
 - **Referencia**: Figuras `06_label_vs_edad.png` y `07_label_vs_genero.png`.
 
 ### 1.3 Intensidad de Interacción como Indicador de Recompra
 
 - Los compradores recurrentes tienden a presentar mayor cantidad de interacciones totales (`total_actions`) con el vendedor en comparación con los no recurrentes.
-- Se observa una asociación positiva entre el número de compras (`purchase`), adiciones al carrito (`cart`) y favoritos (`favorite`) con la probabilidad de recompra.
+- Se observa una asociación positiva de los clics (`clicks`), favoritos (`favorite`) y, en promedio, las compras (`purchase`) con la recompra. Las adiciones al carrito (`cart`) **no** muestran diferencia entre grupos (media 0.02 en ambos).
 - Los compradores recurrentes también muestran mayor número de días activos (`n_days`) en su interacción con el vendedor.
 - **Referencia**: Figuras `08_label_vs_actividad_total.png`, `09_label_vs_tipos_accion.png`, `11_label_vs_dias_activos.png`.
 
@@ -38,14 +38,14 @@ Este documento resume los principales hallazgos del análisis exploratorio de da
 
 - Los clics (action_type = 0) dominan la actividad, representando la gran mayoría de las interacciones.
 - Las compras (action_type = 2) y adiciones al carrito (action_type = 1) son proporcionalmente menos frecuentes.
-- La tasa de compra (`purchase_rate`) y la tasa de favoritos (`favorite_rate`) muestran asociaciones más claras con la recompra que la tasa de clics sola.
+- Las tasas por tipo de acción tienen correlaciones prácticamente nulas con la recompra (`click_rate` 0.023, `favorite_rate` 0.016, `cart_rate` −0.006, `purchase_rate` −0.028): importa más el volumen de interacción que su composición.
 - **Referencia**: Figuras `04_histogramas_variables_numericas.png`, `09_label_vs_tipos_accion.png`.
 
 ### 1.6 Correlaciones entre Métricas de Actividad
 
 - Se observan correlaciones positivas entre métricas de volumen: `total_actions`, `clicks`, `n_items` y `n_days`. Tras recalcular `n_items`, `n_cats`, `n_brands` y `n_days` de forma exacta, la estructura general del patrón se mantiene.
 - Las métricas de proporción (tasas) muestran patrones de correlación diferentes: la `click_rate` tiene correlación negativa con `purchase_rate`, `cart_rate` y `favorite_rate`, lo cual es esperado dado que son proporciones complementarias.
-- La correlación entre `purchase` y `label` es positiva pero moderada, lo que indica que la cantidad de compras por sí sola no es suficiente para predecir la recompra.
+- La correlación entre `purchase` y `label` es positiva pero débil (0.084), lo que indica que la cantidad de compras por sí sola no es suficiente para predecir la recompra.
 - **Referencia**: Figura `13_matriz_correlacion.png`.
 
 ### 1.7 Valores Atípicos
@@ -54,6 +54,30 @@ Este documento resume los principales hallazgos del análisis exploratorio de da
 - Estos valores atípicos no se eliminaron, ya que representan comportamientos reales (posiblemente usuarios automatizados o compradores de alto volumen) y su exclusión sin justificación introduciría sesgo.
 - Se documentaron los percentiles y rangos para facilitar la detección y tratamiento en análisis posteriores.
 - **Referencia**: Figuras `05_boxplots_variables_numericas.png`.
+
+---
+
+### 1.8 Concentración Temporal en el Double 11
+
+- El registro abarca del 11 de mayo al 12 de noviembre (186 días con actividad). La actividad es estable de mayo a octubre; las interacciones (sobre todo clics) crecen desde inicios de noviembre, pero las compras permanecen planas hasta el 11 de noviembre.
+- El Double 11 concentra el **37.2 % de todas las compras** del periodo (~117 veces las compras de un día típico) y el 19.3 % de las interacciones.
+- **Implicación**: conviene separar, en el modelado, la actividad del par durante el Double 11 de la actividad previa.
+- **Referencia**: Figura `15_actividad_diaria.png`.
+
+### 1.9 Pruebas Estadísticas y Tamaño del Efecto
+
+- La prueba U de Mann-Whitney confirma diferencias significativas entre recurrentes y no recurrentes, pero con efectos pequeños: `n_items` (r = 0.20), `total_actions` y `n_cats` (0.17), `clicks` (0.15), `purchase` (0.14) y `n_days` (0.13). `cart` y `n_brands` tienen efecto prácticamente nulo.
+- La correlación de Spearman confirma la dirección y magnitud de las de Pearson: las asociaciones individuales son débiles (≤ 0.10).
+- La prueba χ² indica asociación significativa pero muy débil de la edad (V de Cramér = 0.026) y el género (V = 0.021) con la recompra.
+- **Referencia**: Figura `16_correlacion_pearson_vs_spearman.png`; tablas `pruebas_mann_whitney.csv`, `pruebas_chi_cuadrado.csv`, `correlaciones_label.csv`.
+
+### 1.10 Implicaciones para el Modelado
+
+1. La señal está **repartida entre muchas variables de efecto pequeño** (|r| ≤ 0.10; efecto de Mann-Whitney ≤ 0.20). Esto justifica usar modelos no lineales que combinen variables (Random Forest, *boosting*) y compararlos contra una regresión logística.
+2. `cart` y `n_brands` aportan poco (el carrito representa solo el 0.14 % de las acciones del registro); pueden mantenerse como variables, pero no se espera que sean relevantes.
+3. La demografía aporta una señal débil y conviene incluirla como categórica.
+4. El Double 11 domina las compras, así que conviene crear variables específicas de ese día y de la actividad previa con el vendedor.
+5. El 25 % de filas repetidas en el registro hace que los conteos de acciones incluyan repeticiones del mismo día; las variables de días activos y de productos distintos son más robustas a este efecto.
 
 ---
 
@@ -71,9 +95,9 @@ Este documento resume los principales hallazgos del análisis exploratorio de da
 
 6. **No se puede inferir causalidad**: Las asociaciones encontradas no implican relaciones causales. No es posible afirmar, por ejemplo, que explorar más productos *cause* la recompra; podría ser que los compradores recurrentes simplemente tengan un perfil de navegación más activo.
 
-7. **Identificadores como seller_id/merchant_id**: La correspondencia entre `seller_id` en los logs y `merchant_id` en el entrenamiento requiere validación cuidadosa. El agregado exacto por bloques de `user_id` evita subestimar `n_items`, `n_cats`, `n_brands` y `n_days`.
+7. **Identificadores como seller_id/merchant_id**: La correspondencia entre `seller_id` en los logs y `merchant_id` en el entrenamiento se validó (100 % de los pares de entrenamiento tienen actividad). El particionado por *hash* del par (`user_id`, `seller_id`) garantiza que `n_items`, `n_cats`, `n_brands` y `n_days` sean conteos exactos.
 
-8. **Posibles interacciones duplicadas en user_log**: No se verificó exhaustivamente la presencia de registros idénticos en el archivo de logs debido a su tamaño.
+8. **Interacciones repetidas en user_log**: El 25.03 % de las filas del log (13,750,198) son idénticas a otra fila. Se conservaron como interacciones repetidas el mismo día, pero sin la hora no es posible distinguirlas de registros duplicados por error.
 
 ---
 
@@ -123,5 +147,11 @@ Este documento resume los principales hallazgos del análisis exploratorio de da
 | `12_dispersion_compras_vs_acciones.png` | Dispersión compras vs. acciones totales | `outputs/figures/` |
 | `13_matriz_correlacion.png` | Matriz de correlación de métricas derivadas | `outputs/figures/` |
 | `14_analisis_faltantes_demograficos.png` | Análisis de valores faltantes demográficos | `outputs/figures/` |
+| `15_actividad_diaria.png` | Interacciones y compras por día (pico del Double 11) | `outputs/figures/` |
+| `16_correlacion_pearson_vs_spearman.png` | Correlación de cada variable con la recompra: Pearson vs. Spearman | `outputs/figures/` |
 | `estadisticas_descriptivas.csv` | Estadísticas descriptivas de variables numéricas | `outputs/tables/` |
 | `tabla_analitica_resumen.csv` | Muestra de la tabla analítica construida | `outputs/tables/` |
+| `actividad_diaria.csv` | Conteo diario de cada tipo de acción en el log completo | `outputs/tables/` |
+| `correlaciones_label.csv` | Correlaciones de Pearson y Spearman con `label` | `outputs/tables/` |
+| `pruebas_mann_whitney.csv` | Prueba U de Mann-Whitney y tamaño del efecto por variable | `outputs/tables/` |
+| `pruebas_chi_cuadrado.csv` | Prueba χ² y V de Cramér para edad y género | `outputs/tables/` |

@@ -93,6 +93,18 @@ Interpretación: los recurrentes exploran más y durante más días. En término
 
 Interpretación: la distribución de `n_days` muestra que los recurrentes tienden a extender su interacción durante más días. La mediana sube de 1 a 2 y el cuartil superior de 2 a 3. Los máximos altos en ambos grupos confirman que existen algunos pares con actividad sostenida en ventanas largas, aunque son casos extremos. La evidencia se resume en [11_label_vs_dias_activos.png](../outputs/figures/11_label_vs_dias_activos.png) y en [estadisticas_descriptivas.csv](../outputs/tables/estadisticas_descriptivas.csv).
 
+### 4.5 Actividad temporal
+
+| Indicador | Valor |
+|---|---:|
+| Periodo del registro | 11 de mayo – 12 de noviembre (186 días con actividad) |
+| Interacciones el 11/11 | 10,582,633 (19.3 % del total) |
+| Compras el 11/11 | 1,223,354 (37.2 % del total) |
+| Mediana diaria de compras (resto del periodo) | 10,421 |
+| Compras del 11/11 respecto a un día típico | ≈ 117 veces |
+
+Interpretación: la actividad es estable de mayo a octubre (salvo los primeros días de mayo, casi sin registros). Desde inicios de noviembre crecen las interacciones, sobre todo los clics, pero las compras permanecen planas hasta el 11 de noviembre, cuando se disparan. Esto confirma que los pares de entrenamiento son compradores adquiridos en la promoción y sugiere separar, en el modelado, la actividad del Double 11 de la actividad previa. Ver [15_actividad_diaria.png](../outputs/figures/15_actividad_diaria.png) y [actividad_diaria.csv](../outputs/tables/actividad_diaria.csv).
+
 ## 5. Distribuciones, outliers y faltantes
 
 Las variables numéricas muestran un sesgo claro a la derecha. En los histogramas se concentra gran parte de la masa en valores bajos, mientras que los boxplots revelan colas largas y valores extremos. Esto es coherente con la naturaleza del comportamiento de compra: la mayoría de los pares interactúa poco, pero una fracción menor registra mucha actividad.
@@ -118,6 +130,51 @@ La disponibilidad de variables demográficas sugiere una asociación leve con la
 La matriz de correlación se construyó solo con variables analíticas; no se incluyeron identificadores. Las asociaciones más altas con `label` son positivas y modestas: `n_cats` (0.103), `n_items` (0.099), `purchase` (0.084), `total_actions` (0.081), `n_days` (0.078), `clicks` (0.077) y `favorite` (0.052). Las tasas derivadas muestran correlaciones pequeñas, como `click_rate` (0.023), `favorite_rate` (0.016), `n_brands` (0.015) y `cart_rate` (-0.006). `purchase_rate` aparece con una correlación levemente negativa (-0.028), lo que es compatible con el hecho de que estas tasas son composicionales y no independientes entre sí.
 
 Interpretación: no hay relaciones lineales fuertes con la etiqueta, pero sí un patrón consistente donde la recompra se asocia con mayor intensidad, mayor diversidad de navegación y mayor permanencia. La evidencia se observa en [13_matriz_correlacion.png](../outputs/figures/13_matriz_correlacion.png).
+
+### 6.1 Pearson frente a Spearman
+
+| Variable | Pearson | Spearman |
+|---|---:|---:|
+| `n_items` | 0.099 | 0.088 |
+| `n_cats` | 0.103 | 0.085 |
+| `purchase` | 0.084 | 0.082 |
+| `total_actions` | 0.081 | 0.072 |
+| `clicks` | 0.077 | 0.064 |
+| `n_days` | 0.078 | 0.058 |
+| `click_rate` | 0.023 | 0.037 |
+| `favorite` | 0.052 | 0.032 |
+| `favorite_rate` | 0.016 | 0.026 |
+| `n_brands` | 0.015 | 0.008 |
+| `cart` | −0.003 | −0.006 |
+| `cart_rate` | −0.006 | −0.006 |
+| `purchase_rate` | −0.028 | −0.045 |
+
+Interpretación: Spearman, robusta a outliers, confirma la dirección de todas las asociaciones. En las métricas de conteo da magnitudes algo menores y en las tasas algo mayores, pero ninguna supera 0.09 en valor absoluto. Las correlaciones de Pearson no estaban subestimadas por los valores extremos: cada variable, por separado, se asocia débilmente con la recompra. Ver [16_correlacion_pearson_vs_spearman.png](../outputs/figures/16_correlacion_pearson_vs_spearman.png) y [correlaciones_label.csv](../outputs/tables/correlaciones_label.csv).
+
+### 6.2 Pruebas estadísticas
+
+**Mann-Whitney (recurrentes frente a no recurrentes)**. Tamaño del efecto: correlación biserial de rangos; positivo = valores mayores en recurrentes.
+
+| Variable | Mediana no rec. | Mediana rec. | p-valor | Efecto r |
+|---|---:|---:|---:|---:|
+| `n_items` | 2 | 3 | < 0.001 | 0.203 |
+| `total_actions` | 6 | 8 | < 0.001 | 0.173 |
+| `n_cats` | 1 | 1 | < 0.001 | 0.173 |
+| `clicks` | 4 | 6 | < 0.001 | 0.153 |
+| `purchase` | 1 | 1 | < 0.001 | 0.140 |
+| `n_days` | 1 | 2 | < 0.001 | 0.125 |
+| `favorite` | 0 | 0 | < 0.001 | 0.052 |
+| `n_brands` | 1 | 1 | < 0.001 | 0.010 |
+| `cart` | 0 | 0 | 0.003 | −0.003 |
+
+**χ² de independencia con `label`**
+
+| Variable | χ² | gl | p-valor | V de Cramér |
+|---|---:|---:|---:|---:|
+| `age_range` | 178.59 | 7 | < 0.001 | 0.026 |
+| `gender` | 110.09 | 2 | < 0.001 | 0.021 |
+
+Interpretación: con más de 260,000 observaciones casi todo resulta significativo, por lo que el tamaño del efecto es lo relevante. Los efectos de las métricas de diversidad y volumen son pequeños (0.13–0.20) pero consistentes; `cart` y `n_brands` no aportan diferencia práctica, y las variables demográficas tienen asociaciones muy débiles. Ver [pruebas_mann_whitney.csv](../outputs/tables/pruebas_mann_whitney.csv) y [pruebas_chi_cuadrado.csv](../outputs/tables/pruebas_chi_cuadrado.csv).
 
 ## 7. Interpretación integrada
 
@@ -145,6 +202,8 @@ El análisis también muestra que la distribución de las variables es asimétri
 | Dispersión compras vs acciones | Relación visual entre intensidad y compras | [outputs/figures/12_dispersion_compras_vs_acciones.png](../outputs/figures/12_dispersion_compras_vs_acciones.png) |
 | Matriz de correlación | Relaciones lineales entre variables analíticas | [outputs/figures/13_matriz_correlacion.png](../outputs/figures/13_matriz_correlacion.png) |
 | Faltantes demográficos | Asociación entre disponibilidad de edad/género y `label` | [outputs/figures/14_analisis_faltantes_demograficos.png](../outputs/figures/14_analisis_faltantes_demograficos.png) |
+| Actividad diaria | Pico de interacciones y compras en el Double 11 | [outputs/figures/15_actividad_diaria.png](../outputs/figures/15_actividad_diaria.png) |
+| Pearson vs. Spearman | Robustez de las correlaciones con `label` | [outputs/figures/16_correlacion_pearson_vs_spearman.png](../outputs/figures/16_correlacion_pearson_vs_spearman.png) |
 | Resumen del entrenamiento | Número de observaciones y variables base | [outputs/tables/resumen_columnas_train.csv](../outputs/tables/resumen_columnas_train.csv) |
 | Resumen de información de usuario | Disponibilidad de edad y género | [outputs/tables/resumen_columnas_user_info.csv](../outputs/tables/resumen_columnas_user_info.csv) |
 | Tabla analítica resumida | Estructura final de la base analítica | [outputs/tables/tabla_analitica_resumen.csv](../outputs/tables/tabla_analitica_resumen.csv) |
@@ -153,3 +212,4 @@ El análisis también muestra que la distribución de las variables es asimétri
 | Frecuencia de género por `label` | Distribución y tasa de recompra por género | [outputs/tables/frecuencia_genero_label.csv](../outputs/tables/frecuencia_genero_label.csv) |
 | Promedios de acciones por `label` | Comparación entre recurrentes y no recurrentes | [outputs/tables/medias_acciones_por_label.csv](../outputs/tables/medias_acciones_por_label.csv) |
 | Análisis de outliers | Conteo y porcentaje de valores atípicos | [outputs/tables/analisis_outliers.csv](../outputs/tables/analisis_outliers.csv) |
+| Pruebas estadísticas | Mann-Whitney y χ² con tamaños de efecto | [outputs/tables/pruebas_mann_whitney.csv](../outputs/tables/pruebas_mann_whitney.csv), [outputs/tables/pruebas_chi_cuadrado.csv](../outputs/tables/pruebas_chi_cuadrado.csv) |

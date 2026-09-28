@@ -112,7 +112,7 @@ El conjunto de datos consta de cinco archivos CSV ubicados en el directorio `dat
 - **Filas**: 54,925,330 (~55 millones)
 - **Columnas**: 7
 - **Valores faltantes**: `brand_id`: 91,015 NaN (0.17% del total).
-- **Duplicados**: No verificados de forma exhaustiva debido al tamaño del archivo.
+- **Duplicados**: 13,750,198 filas (25.03 %) son idénticas a otra fila; se conservan porque el registro no tiene hora (ver `03_limpieza_preprocesamiento.md`).
 
 | Variable | Tipo | Descripción |
 |----------|------|-------------|
@@ -128,14 +128,16 @@ El conjunto de datos consta de cinco archivos CSV ubicados en el directorio `dat
 
 **Codificación de `action_type`**:
 
-| Código | Significado |
-|--------|-------------|
-| 0 | Clic (visualización del producto) |
-| 1 | Adición al carrito de compras |
-| 2 | Compra |
-| 3 | Adición a favoritos |
+| Código | Significado | Registros | % del total |
+|--------|-------------|----------:|------------:|
+| 0 | Clic (visualización del producto) | 48,550,713 | 88.39 % |
+| 1 | Adición al carrito de compras | 76,750 | 0.14 % |
+| 2 | Compra | 3,292,144 | 5.99 % |
+| 3 | Adición a favoritos | 3,005,723 | 5.47 % |
 
-**Rango de `time_stamp`**: 511 (11 de mayo) a 1112 (12 de noviembre).
+El carrito es una acción muy poco frecuente en este registro (0.14 %), lo que anticipa que aportará poca información al análisis.
+
+**Rango de `time_stamp`**: 511 (11 de mayo) a 1112 (12 de noviembre), con 186 días distintos.
 
 > **Observación**: El periodo cubierto abarca aproximadamente 6 meses, desde mayo hasta noviembre, incluyendo el festival Double 11. La columna `seller_id` en este archivo corresponde a `merchant_id` en los archivos de entrenamiento y prueba. Este archivo es el más grande del conjunto de datos y requiere procesamiento por fragmentos (*chunks*) para evitar problemas de memoria.
 
@@ -169,7 +171,7 @@ El conjunto de datos consta de cinco archivos CSV ubicados en el directorio `dat
 └─────────────────────────────────────────┘
 ```
 
-- **train/test → user_info**: Se relacionan por `user_id`. No todos los usuarios de train/test necesariamente tienen perfil en user_info.
+- **train/test → user_info**: Se relacionan por `user_id`. El 100 % de los usuarios del conjunto de entrenamiento tiene perfil en user_info.
 - **train/test → user_log**: Se relacionan por `user_id` y `merchant_id` (en train/test) = `seller_id` (en user_log). Un par usuario-vendedor en train/test puede tener múltiples registros de actividad en user_log.
 - **user_log**: Contiene la actividad detallada que permite construir métricas agregadas por par (user_id, seller_id) para enriquecer el análisis de los pares del conjunto de entrenamiento.
 
