@@ -1,0 +1,9 @@
+,pares,usuarios,vendedores,positivos,tasa_positivos,porcentaje_pares
+entrenamiento — pliegue 0,41739,33928,1975,2553,0.0612,16.0003
+entrenamiento — pliegue 1,41737,33888,1983,2552,0.0611,15.9995
+entrenamiento — pliegue 2,41738,33935,1975,2552,0.0611,15.9999
+entrenamiento — pliegue 3,41739,33951,1972,2553,0.0612,16.0003
+entrenamiento — pliegue 4,41738,33914,1983,2552,0.0611,15.9999
+prueba,52173,42446,1988,3190,0.0611,20.0001
+TOTAL test,52173,42446,1988,3190,0.0611,20.0001
+TOTAL train,208691,169616,1991,12762,0.0612,79.9999

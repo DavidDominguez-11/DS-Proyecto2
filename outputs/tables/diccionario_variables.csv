@@ -1,0 +1,65 @@
+variable,nivel,descripcion,auc_abs,direccion
+p_clicks,Par usuario-vendedor,Clics del usuario en el vendedor,0.5769,+
+p_cart,Par usuario-vendedor,Adiciones al carrito con el vendedor,0.5017,−
+p_purchase,Par usuario-vendedor,Compras al vendedor (todas en el Double 11),0.57,+
+p_favorite,Par usuario-vendedor,Favoritos con el vendedor,0.5259,+
+p_actions_d11,Par usuario-vendedor,Interacciones con el vendedor el 11/11,0.5608,+
+p_actions_pre,Par usuario-vendedor,Interacciones con el vendedor antes del 11/11,0.5657,+
+p_actions,Par usuario-vendedor,Interacciones totales con el vendedor,0.5872,+
+p_n_items,Par usuario-vendedor,Productos distintos del vendedor,0.6028,+
+p_n_cats,Par usuario-vendedor,Categorías distintas del vendedor,0.5873,+
+p_n_brands,Par usuario-vendedor,Marcas distintas del vendedor,0.5052,+
+p_n_days,Par usuario-vendedor,Días distintos con actividad con el vendedor,0.5636,+
+p_n_items_bought,Par usuario-vendedor,Productos distintos comprados al vendedor,0.5636,+
+p_clicks_pre,Par usuario-vendedor,Clics antes del 11/11,0.563,+
+p_cart_pre,Par usuario-vendedor,Carrito antes del 11/11,0.5009,−
+p_favorite_pre,Par usuario-vendedor,Favoritos antes del 11/11,0.5232,+
+p_n_days_pre,Par usuario-vendedor,Días con actividad antes del 11/11,0.5636,+
+p_first_days_before,Par usuario-vendedor,Días entre la primera interacción y el 11/11,0.5706,+
+p_last_pre_days_before,Par usuario-vendedor,Días entre la última interacción previa y el 11/11 (0 = sin actividad previa),0.5587,+
+p_has_pre,Par usuario-vendedor,Tuvo actividad con el vendedor antes del 11/11 (0/1),0.5485,+
+p_click_rate,Par usuario-vendedor,Clics / interacciones,0.545,+
+p_cart_rate,Par usuario-vendedor,Carrito / interacciones,0.5017,−
+p_purchase_rate,Par usuario-vendedor,Compras / interacciones,0.5543,−
+p_favorite_rate,Par usuario-vendedor,Favoritos / interacciones,0.5215,+
+p_d11_share,Par usuario-vendedor,Proporción de las interacciones con el vendedor que ocurrieron el 11/11,0.5515,−
+u_clicks,Usuario,Clics del usuario en la plataforma,0.5465,+
+u_cart,Usuario,Carrito del usuario en la plataforma,0.5049,−
+u_purchase,Usuario,Compras del usuario en la plataforma,0.5605,+
+u_favorite,Usuario,Favoritos del usuario en la plataforma,0.5274,+
+u_actions_d11,Usuario,Interacciones del usuario el 11/11,0.5252,+
+u_actions,Usuario,Interacciones totales del usuario,0.5507,+
+u_n_merchants,Usuario,Vendedores distintos con los que interactuó,0.5201,+
+u_n_items,Usuario,Productos distintos,0.5494,+
+u_n_cats,Usuario,Categorías distintas,0.5466,+
+u_n_brands,Usuario,Marcas distintas,0.522,+
+u_n_days,Usuario,Días con actividad,0.554,+
+u_n_merchants_bought,Usuario,Vendedores distintos a los que compró,0.5357,+
+u_n_merchants_bought_d11,Usuario,Vendedores distintos a los que compró el 11/11,0.5026,+
+u_purchase_pre,Usuario,Compras del usuario antes del 11/11,0.5541,+
+u_n_days_purchase,Usuario,Días distintos con compra,0.5509,+
+u_n_merchants_repeat,Usuario,Vendedores a los que compró en ≥ 2 días distintos (fidelidad histórica),0.5386,+
+u_purchase_rate,Usuario,Compras / interacciones del usuario,0.5007,+
+u_d11_share,Usuario,Proporción de la actividad del usuario el 11/11,0.5281,−
+u_repeat_share,Usuario,Vendedores con recompra / vendedores con compra,0.5372,+
+m_clicks,Vendedor,Clics recibidos por el vendedor,0.5557,+
+m_cart,Vendedor,Carrito recibido,0.5438,+
+m_purchase,Vendedor,Compras recibidas,0.5568,+
+m_favorite,Vendedor,Favoritos recibidos,0.5482,+
+m_actions,Vendedor,Interacciones totales recibidas,0.5558,+
+m_n_users,Vendedor,Usuarios distintos que interactuaron,0.5383,+
+m_n_items,Vendedor,Productos distintos del vendedor,0.5334,+
+m_n_cats,Vendedor,Categorías distintas del vendedor,0.529,+
+m_n_brands,Vendedor,Marcas distintas del vendedor,0.5029,−
+m_n_buyers,Vendedor,Compradores distintos,0.5453,+
+m_n_buyers_d11,Vendedor,Compradores distintos el 11/11,0.5441,+
+m_purchase_d11,Vendedor,Compras recibidas el 11/11,0.5531,+
+m_n_repeat_buyers,Vendedor,Compradores que compraron en ≥ 2 días distintos,0.5895,+
+m_conversion,Vendedor,Compradores / usuarios,0.5209,+
+m_purchase_d11_share,Vendedor,Proporción de las compras del vendedor el 11/11,0.509,−
+m_repeat_buyer_rate_log,Vendedor,Compradores con recompra / compradores (fidelidad sin usar la etiqueta),0.622,+
+age_range,Demográfica,"Rango de edad (0 = desconocido, 1 = <18, …, 7 = 50+)",0.5231,+
+gender,Demográfica,"Género (0 = femenino, 1 = masculino, 2 = desconocido)",0.5196,−
+x_share_user_actions,Relación,Interacciones con el vendedor / interacciones del usuario,0.5423,+
+x_share_user_purchase,Relación,Compras al vendedor / compras del usuario,0.5113,−
+x_share_user_merchants_d11,Relación,1 / vendedores a los que el usuario compró el 11/11,0.5026,−
