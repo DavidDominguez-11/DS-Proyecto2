@@ -3,8 +3,11 @@
 # Generated temporary outputs
 /outputs/tmp/
 
-entregables/
+entregables/*
+!entregables/resultados_final/
+entregables/resultados_final/_revision_*.png
 TESTS.ipynb
+guionp2f.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
